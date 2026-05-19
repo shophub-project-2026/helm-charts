@@ -1,0 +1,19 @@
+apiVersion: v2
+name: shop-operator
+description: |
+  Kubernetes operator that watches Shop, DiscordChannel and Wallet CRDs
+  and reconciles the underlying workloads (Deployment, Service, database).
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+kubeVersion: ">=1.26.0-0"
+keywords:
+  - shop
+  - operator
+  - crd
+  - shophub
+home: https://github.com/shophub-project-2026
+sources:
+  - https://github.com/shophub-project-2026/shop-operator
+maintainers:
+  - name: ShopHub team
