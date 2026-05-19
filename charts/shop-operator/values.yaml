@@ -1,0 +1,39 @@
+# Container image for the operator manager.
+image:
+  repository: milos2002/shop-operator
+  tag: development
+  pullPolicy: IfNotPresent
+
+# Number of operator manager replicas. Use 1 unless leader election is enabled.
+replicaCount: 1
+
+# Operator container resource requests and limits.
+resources:
+  limits:
+    cpu: 500m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+serviceAccount:
+  # Create a ServiceAccount for the operator. If false, the chart uses
+  # an existing ServiceAccount specified by .Values.serviceAccount.name.
+  create: true
+  # Override the ServiceAccount name (defaults to the chart fullname).
+  name: ""
+
+rbac:
+  # Create the ClusterRole and ClusterRoleBinding the operator needs to
+  # watch CRDs cluster-wide and reconcile owned objects in any namespace.
+  create: true
+
+# Standard scheduling knobs.
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# Optional pod-level configuration.
+podAnnotations: {}
+podSecurityContext: {}
+securityContext: {}

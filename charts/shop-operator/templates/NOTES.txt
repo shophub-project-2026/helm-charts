@@ -1,0 +1,31 @@
+The shop-operator has been installed in namespace {{ .Release.Namespace }}.
+
+1. Verify the operator pod is running:
+
+   kubectl get pods -n {{ .Release.Namespace }} \
+     -l app.kubernetes.io/instance={{ .Release.Name }}
+
+2. The following CRDs are now available cluster-wide:
+
+   - shops.shop.devops.io
+   - discordchannels.shop.devops.io
+   - wallets.shop.devops.io
+
+3. Create your first Shop resource:
+
+   cat <<EOF | kubectl apply -f -
+   apiVersion: shop.devops.io/v1alpha1
+   kind: Shop
+   metadata:
+     name: example-shop
+     namespace: default
+   spec:
+     availability: standard
+     database: standard
+     walletAddress: "0x742d35Cc6634C0532925a3b844Bc9e7595f42e0"
+   EOF
+
+4. Tail the operator logs to watch reconciliation:
+
+   kubectl logs -n {{ .Release.Namespace }} \
+     -l app.kubernetes.io/instance={{ .Release.Name }} -f
