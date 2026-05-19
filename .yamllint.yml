@@ -21,6 +21,13 @@ rules:
   truthy:
     allowed-values: ['true', 'false', 'on', 'off']
     check-keys: false
-  # Document-start (---) is helpful but not strictly required.
-  document-start:
-    present: false
+  # controller-gen emits `---` at the top of CRDs; our hand-written
+  # Chart.yaml and values.yaml do not. Disable the rule so either is fine.
+  document-start: disable
+  # controller-gen emits block sequences in compact style (no indent from
+  # parent key), while our hand-written Chart.yaml uses the indented style.
+  # `consistent` accepts either, as long as a single file uses one style
+  # throughout -- which both controller-gen output and our YAML satisfy.
+  indentation:
+    spaces: 2
+    indent-sequences: consistent
