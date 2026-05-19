@@ -1,0 +1,55 @@
+{{- if .Values.rbac.create -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "shop-operator.fullname" . }}
+  labels:
+    {{- include "shop-operator.labels" . | nindent 4 }}
+rules:
+  # Shop CRDs the operator owns and reconciles.
+  - apiGroups: ["shop.devops.io"]
+    resources: ["shops", "discordchannels", "wallets"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["shop.devops.io"]
+    resources: ["shops/status", "discordchannels/status", "wallets/status"]
+    verbs: ["get", "update", "patch"]
+  - apiGroups: ["shop.devops.io"]
+    resources: ["shops/finalizers", "discordchannels/finalizers", "wallets/finalizers"]
+    verbs: ["update"]
+  # Workloads owned by the Shop reconciler.
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: [""]
+    resources: ["services"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  # External database operator CRDs (CNPG, Redis Enterprise).
+  - apiGroups: ["postgresql.cnpg.io"]
+    resources: ["clusters"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["app.redislabs.com"]
+    resources: ["redisenterprisedatabases"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  # Required by controller-runtime for leader election and event recording.
+  - apiGroups: ["coordination.k8s.io"]
+    resources: ["leases"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["create", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "shop-operator.fullname" . }}
+  labels:
+    {{- include "shop-operator.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "shop-operator.fullname" . }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "shop-operator.serviceAccountName" . }}
+    namespace: {{ .Release.Namespace }}
+{{- end }}
