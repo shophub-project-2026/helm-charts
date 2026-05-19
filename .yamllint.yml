@@ -1,0 +1,26 @@
+---
+# yamllint configuration for the helm-charts repository.
+# Helm templates produce go-template directives that are NOT valid YAML
+# until rendered; we therefore restrict yamllint to actual YAML files
+# (Chart.yaml, values.yaml, crds/) and skip the templates/ directory.
+
+extends: default
+
+ignore: |
+  charts/*/templates/
+
+rules:
+  # Helm chart CRDs and openAPIV3Schema entries legitimately exceed 80 chars.
+  line-length:
+    max: 160
+    level: warning
+  # Comments in Chart.yaml and values.yaml are often inline; allow 1 space.
+  comments:
+    min-spaces-from-content: 1
+  # Allow `truthy` values like `on:` (used in GitHub Actions) and `yes/no`.
+  truthy:
+    allowed-values: ['true', 'false', 'on', 'off']
+    check-keys: false
+  # Document-start (---) is helpful but not strictly required.
+  document-start:
+    present: false

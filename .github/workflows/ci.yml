@@ -1,0 +1,105 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+      - development
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  HELM_VERSION: v3.14.0
+  KUBECONFORM_VERSION: v0.6.4
+
+jobs:
+  commitlint:
+    name: Conventional Commits
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Conventional Commits check
+        uses: wagoid/commitlint-github-action@v5
+
+  yamllint:
+    name: YAML lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install yamllint
+        run: pip install yamllint==1.35.1
+
+      - name: Run yamllint
+        run: yamllint -c .yamllint.yml charts/
+
+  helm-lint:
+    name: Helm lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: ${{ env.HELM_VERSION }}
+
+      - name: Lint all charts
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          for chart in charts/*/; do
+            echo "::group::helm lint $chart"
+            helm lint "$chart"
+            echo "::endgroup::"
+          done
+
+  helm-template-validate:
+    name: Helm template + kubeconform
+    needs: helm-lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: ${{ env.HELM_VERSION }}
+
+      - name: Install kubeconform
+        run: |
+          set -euo pipefail
+          curl -sSL -o kubeconform.tar.gz \
+            "https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz"
+          tar -xzf kubeconform.tar.gz
+          sudo install kubeconform /usr/local/bin/kubeconform
+          kubeconform -v
+
+      - name: Render and validate each chart
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          for chart in charts/*/; do
+            chart_name="$(basename "$chart")"
+            echo "::group::Render + validate $chart_name"
+            helm template "$chart_name" "$chart" \
+              --namespace ci-validate \
+              --include-crds \
+              | kubeconform \
+                  -strict \
+                  -summary \
+                  -ignore-missing-schemas \
+                  -schema-location default
+            echo "::endgroup::"
+          done
