@@ -54,6 +54,14 @@ jobs:
         with:
           version: ${{ env.HELM_VERSION }}
 
+      - name: Resolve chart dependencies
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          for chart in charts/*/; do
+            helm dependency build "$chart"
+          done
+
       - name: Lint all charts
         run: |
           set -euo pipefail
@@ -76,6 +84,14 @@ jobs:
         uses: azure/setup-helm@v4
         with:
           version: ${{ env.HELM_VERSION }}
+
+      - name: Resolve chart dependencies
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          for chart in charts/*/; do
+            helm dependency build "$chart"
+          done
 
       - name: Install kubeconform
         run: |
