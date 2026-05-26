@@ -23,6 +23,14 @@ rules:
   - apiGroups: [""]
     resources: ["services"]
     verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  # CNPG creates the application Secret with database credentials — operator must read it
+  # to wire env vars into the Shop Deployment, and watch it to react on rotation.
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list", "watch"]
   # External database operator CRDs (CNPG, Redis Enterprise).
   - apiGroups: ["postgresql.cnpg.io"]
     resources: ["clusters"]
