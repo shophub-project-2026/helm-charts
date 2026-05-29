@@ -2,7 +2,9 @@
 image:
   repository: milos2002/shop-operator
   tag: development
-  pullPolicy: IfNotPresent
+  # Always for the mutable :development tag so a rollout picks up the latest
+  # CI build. Override to IfNotPresent for unique local-<ts> tags (deploy-local).
+  pullPolicy: Always
 
 # Number of operator manager replicas. Use 1 unless leader election is enabled.
 replicaCount: 1
