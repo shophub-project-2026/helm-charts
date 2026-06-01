@@ -9,6 +9,9 @@ image:
 # Number of operator manager replicas. Use 1 unless leader election is enabled.
 replicaCount: 1
 
+# Default shop image to be deployed by this operator
+defaultShopImage: milos2002/shop:development
+
 # Operator container resource requests and limits.
 resources:
   limits:
