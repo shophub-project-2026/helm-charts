@@ -33,6 +33,22 @@ rbac:
   # watch CRDs cluster-wide and reconcile owned objects in any namespace.
   create: true
 
+# Discord bot used by the DiscordChannel controller to provision a dedicated
+# channel + webhook per shop (spec §3.1/§4.1). The bot must be invited to the
+# guild with the Manage Channels and Manage Webhooks permissions.
+#
+# Leave guildId empty to disable bot-driven creation — the operator still runs
+# and the manual webhookUrl override on a DiscordChannel keeps working.
+#
+# The bot token is read from an existing Secret you create out-of-band so the
+# token is never committed to git (see kube-state shop-operator-discord-secret).
+discord:
+  guildId: ""
+  botToken:
+    # Name of an existing Secret holding the bot token. Empty disables the env.
+    secretName: ""
+    secretKey: bot-token
+
 # Standard scheduling knobs.
 nodeSelector: {}
 tolerations: []
