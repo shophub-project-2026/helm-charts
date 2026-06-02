@@ -31,6 +31,17 @@ spec:
           env:
             - name: DEFAULT_SHOP_IMAGE
               value: {{ .Values.defaultShopImage | quote }}
+            {{- if .Values.discord.guildId }}
+            - name: DISCORD_GUILD_ID
+              value: {{ .Values.discord.guildId | quote }}
+            {{- end }}
+            {{- if .Values.discord.botToken.secretName }}
+            - name: DISCORD_BOT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.discord.botToken.secretName }}
+                  key: {{ .Values.discord.botToken.secretKey }}
+            {{- end }}
           {{- with .Values.securityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}
