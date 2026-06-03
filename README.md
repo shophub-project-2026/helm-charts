@@ -6,10 +6,10 @@ versioned independently via its own `Chart.yaml`.
 
 ## Charts
 
-| Chart                                  | Purpose                                                       | Status   |
-|----------------------------------------|---------------------------------------------------------------|----------|
-| [`shop-operator`](charts/shop-operator) | Deploys the Shop operator and installs its CRDs (req. 3.2)    | active   |
-| `shophub`                              | Deploys the ShopHub control plane (req. 3.3)                  | planned  |
+| Chart | Purpose | Status |
+|---|---|---|
+| [`shop-operator`](charts/shop-operator) | Deploys the Shop operator and installs its CRDs (req. 3.2) | active |
+| [`shophub`](charts/shophub) | Deploys the ShopHub control plane (req. 3.3) | active |
 
 ## Layout
 
@@ -17,20 +17,37 @@ versioned independently via its own `Chart.yaml`.
 helm-charts/
 ├── README.md
 └── charts/
-    └── shop-operator/
+    ├── shop-operator/
+    │   ├── Chart.yaml
+    │   ├── values.yaml
+    │   ├── README.md
+    │   ├── crds/
+    │   │   ├── shops.yaml
+    │   │   ├── discordchannels.yaml
+    │   │   └── wallets.yaml
+    │   └── templates/
+    │       ├── _helpers.tpl
+    │       ├── NOTES.txt
+    │       ├── deployment.yaml
+    │       ├── rbac.yaml
+    │       └── serviceaccount.yaml
+    └── shophub/
         ├── Chart.yaml
         ├── values.yaml
         ├── README.md
-        ├── crds/
-        │   ├── shops.yaml
-        │   ├── discordchannels.yaml
-        │   └── wallets.yaml
+        ├── charts/
+        │   └── kube-prometheus-stack-85.3.3.tgz
         └── templates/
             ├── _helpers.tpl
             ├── NOTES.txt
             ├── deployment.yaml
+            ├── hpa.yaml
+            ├── ingress.yaml
             ├── rbac.yaml
-            └── serviceaccount.yaml
+            ├── secret.yaml
+            ├── service.yaml
+            ├── serviceaccount.yaml
+            └── servicemonitor.yaml
 ```
 
 ## Conventions
