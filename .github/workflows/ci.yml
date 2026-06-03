@@ -91,6 +91,12 @@ jobs:
         with:
           version: ${{ env.HELM_VERSION }}
 
+      - name: Add Helm repositories
+        run: |
+          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm repo update
+
       - name: Resolve chart dependencies
         run: |
           set -euo pipefail
@@ -98,12 +104,6 @@ jobs:
           for chart in charts/*/; do
             helm dependency build "$chart"
           done
-
-      - name: Add Helm repositories
-        run: |
-          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-          helm repo add bitnami https://charts.bitnami.com/bitnami
-          helm repo update
 
       - name: Install kubeconform
         run: |
