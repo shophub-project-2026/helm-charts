@@ -31,6 +31,10 @@ spec:
           env:
             - name: DEFAULT_SHOP_IMAGE
               value: {{ .Values.defaultShopImage | quote }}
+            {{- if .Values.ethRpcUrl }}
+            - name: ETH_RPC_URL
+              value: {{ .Values.ethRpcUrl | quote }}
+            {{- end }}
             {{- if .Values.discord.guildId }}
             - name: DISCORD_GUILD_ID
               value: {{ .Values.discord.guildId | quote }}

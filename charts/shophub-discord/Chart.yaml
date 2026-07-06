@@ -1,0 +1,21 @@
+apiVersion: v2
+name: shophub-discord
+description: |
+  Platform-level Discord alert routing for the ShopHub platform: an
+  AlertmanagerConfig that delivers Kubernetes-cluster and ShopHub alerts
+  (team=platform|shophub) to a Discord channel via webhook. Per-shop alert
+  routing is provisioned separately by the shop-operator for each Shop CR.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+kubeVersion: ">=1.26.0-0"
+keywords:
+  - shophub
+  - discord
+  - alertmanager
+  - observability
+home: https://github.com/shophub-project-2026
+sources:
+  - https://github.com/shophub-project-2026/helm-charts
+maintainers:
+  - name: ShopHub team

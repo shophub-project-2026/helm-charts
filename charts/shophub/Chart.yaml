@@ -1,10 +1,10 @@
 apiVersion: v2
 name: shophub
 description: |
-  ShopHub admin service — manages Shop CRDs via the Kubernetes API
+  ShopHub admin service - manages Shop CRDs via the Kubernetes API
   and provides a web UI and REST API for store management.
 type: application
-version: 0.1.0
+version: 0.2.0
 appVersion: "0.1.0"
 kubeVersion: ">=1.26.0-0"
 keywords:

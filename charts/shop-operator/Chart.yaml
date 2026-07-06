@@ -1,10 +1,10 @@
-apiVersion: v2
+﻿apiVersion: v2
 name: shop-operator
 description: |
   Kubernetes operator that watches Shop, DiscordChannel and Wallet CRDs
   and reconciles the underlying workloads (Deployment, Service, database).
 type: application
-version: 0.1.0
+version: 0.2.0
 appVersion: "0.1.0"
 kubeVersion: ">=1.26.0-0"
 keywords:

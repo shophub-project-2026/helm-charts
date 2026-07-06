@@ -12,6 +12,10 @@ replicaCount: 1
 # Default shop image to be deployed by this operator
 defaultShopImage: milos2002/shop:development
 
+# JSON-RPC endpoint the Wallet controller uses for on-chain balance lookups.
+# Empty uses the operator's built-in default (Ethereum Sepolia via publicnode).
+ethRpcUrl: ""
+
 # Operator container resource requests and limits.
 resources:
   limits:
