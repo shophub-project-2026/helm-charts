@@ -46,6 +46,8 @@ rbac:
 config:
   httpPort: "8080"
   jwtSecret: "change-me-in-production"
+  # Static database connection values. Ignored when database.cnpg.enabled is
+  # true — the app then reads credentials from the CNPG-generated app Secret.
   db:
     host: "postgresql"
     port: "5432"
@@ -53,6 +55,21 @@ config:
     user: "shophub_user"
     password: "shophub_password"
   kubeconfig: ""
+
+# ShopHub's own PostgreSQL, deployed through the CloudNativePG operator CRD —
+# the same operator that provisions per-shop databases (spec §1.2 napomena:
+# databases are deployed via their operators). When enabled the chart renders
+# a postgresql.cnpg.io/v1 Cluster and wires the app to the credentials CNPG
+# publishes in the Secret <clusterName>-app; config.db.* is then ignored.
+# Requires the CNPG operator to be installed in the cluster.
+database:
+  cnpg:
+    enabled: false
+    clusterName: shophub-db
+    instances: 1
+    storageSize: 1Gi
+    databaseName: shophub_db
+    owner: shophub_user
 
 serviceMonitor:
   enabled: true

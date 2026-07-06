@@ -46,6 +46,36 @@ spec:
                 secretKeyRef:
                   name: {{ include "shophub.fullname" . }}
                   key: jwt-secret
+            {{- if .Values.database.cnpg.enabled }}
+            {{- /* Credentials come from the CNPG-managed app Secret so no
+                   database password ever lives in chart values. */}}
+            {{- $dbSecret := printf "%s-app" .Values.database.cnpg.clusterName }}
+            - name: SHOPHUB_DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $dbSecret }}
+                  key: host
+            - name: SHOPHUB_DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $dbSecret }}
+                  key: port
+            - name: SHOPHUB_DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $dbSecret }}
+                  key: dbname
+            - name: SHOPHUB_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $dbSecret }}
+                  key: username
+            - name: SHOPHUB_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $dbSecret }}
+                  key: password
+            {{- else }}
             - name: SHOPHUB_DB_HOST
               value: {{ .Values.config.db.host | quote }}
             - name: SHOPHUB_DB_PORT
@@ -59,6 +89,7 @@ spec:
                 secretKeyRef:
                   name: {{ include "shophub.fullname" . }}
                   key: db-password
+            {{- end }}
             {{- if .Values.config.kubeconfig }}
             - name: SHOPHUB_KUBECONFIG
               value: {{ .Values.config.kubeconfig | quote }}
