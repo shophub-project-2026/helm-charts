@@ -1,0 +1,122 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "shophub.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "shophub.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.hpa.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "shophub.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "shophub.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "shophub.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: shophub
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.config.httpPort | int }}
+              protocol: TCP
+          env:
+            - name: SHOPHUB_HTTP_PORT
+              value: {{ .Values.config.httpPort | quote }}
+            - name: SHOPHUB_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "shophub.fullname" . }}
+                  key: jwt-secret
+            {{- if .Values.database.cnpg.enabled }}
+            {{- /* Credentials come from the CNPG-managed app Secret so no
+                   database password ever lives in chart values. */}}
+            {{- $dbSecret := printf "%s-app" .Values.database.cnpg.clusterName }}
+            - name: SHOPHUB_DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $dbSecret }}
+                  key: host
+            - name: SHOPHUB_DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $dbSecret }}
+                  key: port
+            - name: SHOPHUB_DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $dbSecret }}
+                  key: dbname
+            - name: SHOPHUB_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $dbSecret }}
+                  key: username
+            - name: SHOPHUB_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $dbSecret }}
+                  key: password
+            {{- else }}
+            - name: SHOPHUB_DB_HOST
+              value: {{ .Values.config.db.host | quote }}
+            - name: SHOPHUB_DB_PORT
+              value: {{ .Values.config.db.port | quote }}
+            - name: SHOPHUB_DB_NAME
+              value: {{ .Values.config.db.name | quote }}
+            - name: SHOPHUB_DB_USER
+              value: {{ .Values.config.db.user | quote }}
+            - name: SHOPHUB_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "shophub.fullname" . }}
+                  key: db-password
+            {{- end }}
+            {{- if .Values.config.kubeconfig }}
+            - name: SHOPHUB_KUBECONFIG
+              value: {{ .Values.config.kubeconfig | quote }}
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

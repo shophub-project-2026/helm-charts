@@ -1,0 +1,35 @@
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  name: {{ include "shophub-discord.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "shophub-discord.labels" . | nindent 4 }}
+    {{- with .Values.alertmanagerConfigLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  route:
+    receiver: discord
+    groupBy:
+      {{- toYaml .Values.route.groupBy | nindent 6 }}
+    groupWait: {{ .Values.route.groupWait }}
+    groupInterval: {{ .Values.route.groupInterval }}
+    repeatInterval: {{ .Values.route.repeatInterval }}
+    matchers:
+      {{- toYaml .Values.route.matchers | nindent 6 }}
+  receivers:
+    - name: discord
+      discordConfigs:
+        - apiURL:
+            key: {{ .Values.discord.secret.key }}
+            name: {{ .Values.discord.secret.name }}
+          title: >-
+            [{{ `{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}` }}]
+            {{ `{{ .CommonLabels.alertname }}` }}
+          message: >-
+            {{ `{{ range .Alerts }}` }}
+            **Alert:** {{ `{{ .Annotations.summary }}` }}
+            **Severity:** {{ `{{ .Labels.severity }}` }}
+            **Description:** {{ `{{ .Annotations.description }}` }}
+            {{ `{{ end }}` }}
