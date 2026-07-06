@@ -1,0 +1,37 @@
+# Discord webhook the platform alerts are delivered to.
+#
+# The webhook URL is a credential and must NOT be committed to git. Either:
+#   - leave webhookUrl empty and create the Secret out-of-band
+#     (kubectl create secret generic <secret.name> --from-literal=<secret.key>=<url>), or
+#   - set webhookUrl at install time (--set discord.webhookUrl=...) and let the
+#     chart render the Secret.
+discord:
+  webhookUrl: ""
+  secret:
+    # Existing/created Secret holding the webhook URL.
+    name: alertmanager-discord-secret
+    key: webhook-url
+
+# Alert routing. Platform alerts carry a team label (platform|shophub); per-shop
+# alerts carry a shop label and are routed by the shop-operator's per-shop
+# AlertmanagerConfig instead, so they are intentionally excluded here.
+route:
+  matchers:
+    - name: team
+      matchType: "=~"
+      value: "platform|shophub"
+  groupBy:
+    - alertname
+    - namespace
+    - severity
+  groupWait: 30s
+  groupInterval: 5m
+  repeatInterval: 12h
+
+# Label the Prometheus operator uses to pick up this AlertmanagerConfig
+# (kube-prometheus-stack's alertmanagerConfigSelector).
+alertmanagerConfigLabels:
+  release: kube-prometheus-stack
+
+nameOverride: ""
+fullnameOverride: ""

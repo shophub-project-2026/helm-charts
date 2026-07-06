@@ -1,0 +1,16 @@
+shophub-discord {{ .Chart.Version }} deployed to namespace {{ .Release.Namespace }}.
+
+Platform alerts labelled team=platform or team=shophub are now routed to the
+Discord webhook in Secret "{{ .Values.discord.secret.name }}" (key
+"{{ .Values.discord.secret.key }}").
+
+{{- if not .Values.discord.webhookUrl }}
+
+The Secret is NOT managed by this release. If it does not exist yet, create it:
+
+  kubectl create secret generic {{ .Values.discord.secret.name }} \
+    --namespace {{ .Release.Namespace }} \
+    --from-literal={{ .Values.discord.secret.key }}='<discord-webhook-url>'
+{{- end }}
+
+Per-shop alert channels are provisioned automatically by the shop-operator.
