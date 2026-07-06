@@ -28,6 +28,24 @@ spec:
         - name: manager
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: DEFAULT_SHOP_IMAGE
+              value: {{ .Values.defaultShopImage | quote }}
+            {{- if .Values.ethRpcUrl }}
+            - name: ETH_RPC_URL
+              value: {{ .Values.ethRpcUrl | quote }}
+            {{- end }}
+            {{- if .Values.discord.guildId }}
+            - name: DISCORD_GUILD_ID
+              value: {{ .Values.discord.guildId | quote }}
+            {{- end }}
+            {{- if .Values.discord.botToken.secretName }}
+            - name: DISCORD_BOT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.discord.botToken.secretName }}
+                  key: {{ .Values.discord.botToken.secretKey }}
+            {{- end }}
           {{- with .Values.securityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}

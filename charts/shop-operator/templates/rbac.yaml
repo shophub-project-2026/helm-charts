@@ -20,15 +20,39 @@ rules:
   - apiGroups: ["apps"]
     resources: ["deployments"]
     verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  # StatefulSets are created by the Redis operator for database=light shops;
+  # the reconciler reads their status to gate the shop deployment on readiness.
+  - apiGroups: ["apps"]
+    resources: ["statefulsets"]
+    verbs: ["get", "list", "watch"]
   - apiGroups: [""]
     resources: ["services"]
     verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
-  # External database operator CRDs (CNPG, Redis Enterprise).
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  # CNPG creates the application Secret with database credentials — operator must read it
+  # to wire env vars into the Shop Deployment, and watch it to react on rotation.
+  # The operator also creates a per-shop Secret holding the Discord webhook used
+  # by the shop's AlertmanagerConfig.
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  # Per-shop Grafana dashboards are shipped as ConfigMaps (grafana_dashboard=1).
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  # Per-shop observability: alert rules and Discord routing.
+  - apiGroups: ["monitoring.coreos.com"]
+    resources: ["prometheusrules", "alertmanagerconfigs"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  # External database operator CRDs: CNPG (standard) and the OT-Container-Kit
+  # Redis operator (light).
   - apiGroups: ["postgresql.cnpg.io"]
     resources: ["clusters"]
     verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
-  - apiGroups: ["app.redislabs.com"]
-    resources: ["redisenterprisedatabases"]
+  - apiGroups: ["redis.redis.opstreelabs.in"]
+    resources: ["redis"]
     verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
   # Required by controller-runtime for leader election and event recording.
   - apiGroups: ["coordination.k8s.io"]

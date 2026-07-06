@@ -48,12 +48,38 @@ spec:
           spec:
             properties:
               availability:
+                description: |-
+                  Application availability tier (spec §1.2/§3.1): standard runs
+                  2 replicas, high runs 3. Defaults to standard.
+                default: standard
+                enum:
+                - standard
+                - high
                 type: string
               database:
+                description: |-
+                  Database tier (spec §1.2): standard deploys PostgreSQL via the
+                  CNPG operator, light deploys Redis via the Redis operator.
+                  Defaults to standard.
+                default: standard
+                enum:
+                - standard
+                - light
                 type: string
               image:
                 type: string
+              notificationWebhook:
+                description: |-
+                  Optional Discord webhook URL. When set, the operator provisions
+                  a DiscordChannel and an Alertmanager route so this shop's alerts
+                  are delivered to its own Discord channel.
+                type: string
               walletAddress:
+                description: |-
+                  Merchant's Ethereum address that customer payments are sent to.
+                  Must be a 0x-prefixed 20-byte hex string. EIP-55 mixed case is
+                  accepted; checksum is not enforced at admission time.
+                pattern: ^0x[a-fA-F0-9]{40}$
                 type: string
             required:
             - walletAddress

@@ -1,0 +1,24 @@
+apiVersion: v2
+name: shophub
+description: |
+  ShopHub admin service - manages Shop CRDs via the Kubernetes API
+  and provides a web UI and REST API for store management.
+type: application
+version: 0.2.0
+appVersion: "0.1.0"
+kubeVersion: ">=1.26.0-0"
+keywords:
+  - shophub
+  - shop
+  - admin
+  - kubernetes
+home: https://github.com/shophub-project-2026
+sources:
+  - https://github.com/shophub-project-2026/shophub
+maintainers:
+  - name: ShopHub team
+dependencies:
+  - name: kube-prometheus-stack
+    version: ">=58.0.0"
+    repository: https://prometheus-community.github.io/helm-charts
+    condition: prometheus-stack.enabled

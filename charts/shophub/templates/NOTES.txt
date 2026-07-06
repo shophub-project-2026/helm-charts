@@ -1,0 +1,40 @@
+ShopHub has been deployed successfully.
+
+  Release:   {{ .Release.Name }}
+  Namespace: {{ .Release.Namespace }}
+  Version:   {{ .Chart.AppVersion }}
+
+-- Access --
+
+{{- if .Values.ingress.enabled }}
+  The service is exposed via Ingress:
+  {{- range .Values.ingress.hosts }}
+    http{{ if $.Values.ingress.tls }}s{{ end }}://{{ .host }}
+  {{- end }}
+{{- else }}
+  Port-forward to access the UI locally:
+
+    kubectl port-forward -n {{ .Release.Namespace }} \
+      svc/{{ include "shophub.fullname" . }} 8080:{{ .Values.service.port }}
+
+  Then open: http://localhost:8080
+{{- end }}
+
+-- Configuration --
+
+  Update config values by upgrading the release:
+
+    helm upgrade {{ .Release.Name }} charts/shophub \
+      --set config.jwtSecret=<secret> \
+      --set config.db.host=<host>
+
+  IMPORTANT: Change config.jwtSecret before exposing to the internet.
+
+-- Observability --
+
+{{- if .Values.serviceMonitor.enabled }}
+  A ServiceMonitor is installed — Prometheus will scrape {{ .Values.serviceMonitor.path }}
+  at {{ .Values.serviceMonitor.interval }} intervals.
+{{- else }}
+  ServiceMonitor is disabled. Enable with --set serviceMonitor.enabled=true.
+{{- end }}
