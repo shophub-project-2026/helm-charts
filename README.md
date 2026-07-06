@@ -9,7 +9,24 @@ versioned independently via its own `Chart.yaml`.
 | Chart | Purpose | Status |
 |---|---|---|
 | [`shop-operator`](charts/shop-operator) | Deploys the Shop operator and installs its CRDs (req. 3.2) | active |
-| [`shophub`](charts/shophub) | Deploys the ShopHub control plane (req. 3.3) | active |
+| [`shophub`](charts/shophub) | Deploys the ShopHub control plane + its CNPG database (req. 3.3) | active |
+| [`shophub-discord`](charts/shophub-discord) | Platform Discord alert routing (AlertmanagerConfig) | active |
+
+## OCI publishing (req. 5.3)
+
+Every push to `main` that touches `charts/**` packages the charts and pushes
+them to the GitHub Container Registry as OCI artifacts
+(see [.github/workflows/release.yml](.github/workflows/release.yml)):
+
+```
+oci://ghcr.io/shophub-project-2026/charts/shop-operator
+oci://ghcr.io/shophub-project-2026/charts/shophub
+oci://ghcr.io/shophub-project-2026/charts/shophub-discord
+```
+
+The `kube-state` repository references charts exclusively by these OCI names.
+After the first publish, mark the GHCR packages **public** (org → Packages →
+package → Settings → Change visibility) so `helm pull` works anonymously.
 
 ## Layout
 
@@ -31,23 +48,33 @@ helm-charts/
     │       ├── deployment.yaml
     │       ├── rbac.yaml
     │       └── serviceaccount.yaml
-    └── shophub/
+    ├── shophub/
+    │   ├── Chart.yaml
+    │   ├── values.yaml
+    │   ├── README.md
+    │   ├── charts/
+    │   │   └── kube-prometheus-stack-85.3.3.tgz
+    │   └── templates/
+    │       ├── _helpers.tpl
+    │       ├── NOTES.txt
+    │       ├── cnpg-cluster.yaml
+    │       ├── deployment.yaml
+    │       ├── hpa.yaml
+    │       ├── ingress.yaml
+    │       ├── rbac.yaml
+    │       ├── secret.yaml
+    │       ├── service.yaml
+    │       ├── serviceaccount.yaml
+    │       └── servicemonitor.yaml
+    └── shophub-discord/
         ├── Chart.yaml
         ├── values.yaml
         ├── README.md
-        ├── charts/
-        │   └── kube-prometheus-stack-85.3.3.tgz
         └── templates/
             ├── _helpers.tpl
             ├── NOTES.txt
-            ├── deployment.yaml
-            ├── hpa.yaml
-            ├── ingress.yaml
-            ├── rbac.yaml
-            ├── secret.yaml
-            ├── service.yaml
-            ├── serviceaccount.yaml
-            └── servicemonitor.yaml
+            ├── alertmanagerconfig.yaml
+            └── secret.yaml
 ```
 
 ## Conventions
